@@ -11,13 +11,12 @@ data$admission_type_id <- as.factor(data$admission_type_id)
 data$discharge_disposition_id <- as.factor(data$discharge_disposition_id)
 data$admission_source_id <- as.factor(data$admission_source_id)
 
-# removing duplicate patient numbers
+# view the rows with duplicate values
 duplicates <- data[duplicated(data$patient_nbr), ]
 print(duplicates)
-data <- data[!duplicated(data$patient_nbr),]
 
-# view the rows with duplicate values
-print(duplicates)
+# removing duplicate patient numbers
+data <- data[!duplicated(data$patient_nbr),]
 
 #replacing all "?" with "NA"
 data[data == "?"] <- NA

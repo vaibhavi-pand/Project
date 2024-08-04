@@ -11,12 +11,13 @@ data$admission_type_id <- as.factor(data$admission_type_id)
 data$discharge_disposition_id <- as.factor(data$discharge_disposition_id)
 data$admission_source_id <- as.factor(data$admission_source_id)
 
+
 # view the rows with duplicate values
-duplicates <- data[duplicated(data$patient_nbr), ]
-print(duplicates)
+#duplicates <- data[duplicated(data$encounter_id), ]
+#print(duplicates)
 
 # removing duplicate patient numbers
-data <- data[!duplicated(data$patient_nbr),]
+#data <- data[!duplicated(data$patient_nbr),]
 
 #replacing all "?" with "NA"
 data[data == "?"] <- NA
@@ -43,10 +44,10 @@ ggplot(missing_values, aes(x = reorder(variable, -n), y = n)) +
 data$weight = NULL
 data$payer_code = NULL
 data$medical_specialty = NULL
-data$patient_nbr = NULL
 
 # removing variables which will not serve the analysis
-data$encounter_id = NULL # id which will not have any effect on analysis
+data$encounter_id = NULL # id which will not have any effect o analysis
+data$patient_nbr = NULL # id which will not have any effect o analysis
 data$diag_2 = NULL # will use diag_1 for analysis which is primary
 data$diag_3 = NULL # will use diag_1 for analysis which is primary
 data$examide = NULL # have only one value "No"
@@ -68,6 +69,9 @@ ggplot(data, aes(x = race, fill = race)) +
        y = "Count") +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+# Race Caucasian is causing bias so removing variable race
+data$race = NULL
 
 ggplot(data, aes(x = gender, fill = gender)) +
   geom_bar() +
@@ -175,7 +179,47 @@ ggplot(cor_data, aes(Variable1, Variable2, fill = Correlation)) +
 #Variables num_medications and num_lab_procedures have positive correlation.
 
 
-## Modeling
+
+
+#Encoding
+library(dplyr)
+library(forcats)
+
+# Assuming 'data' is your dataframe
+
+# Automatically detect categorical variables
+categorical_vars <- names(data)[sapply(data, is.factor)]
+
+# Perform label encoding
+data_encoded <- data %>%
+  mutate(across(all_of(categorical_vars), ~ as.integer(as.factor(.))))
+
+# Check the encoded data
+str(data_encoded)
+
+#Random Forest
+library(C50)
+library(caret)
+library(lattice)
+attach(data)
+library(randomForest)
+
+inTrainingData <- createDataPartition(y= readmitted, p=0.70, list = FALSE)
+trainData <- data[inTrainingData,]
+testData <- data[-inTrainingData,]
+
+#Build the model on the training data
+
+#Build the model on the training data
+dtModel <- C5.0(trainData[1:36], trainData$readmitted)
+plot(dtModel)
+
+rf <- randomForest(readmitted~., data=trainData, proximity=TRUE)
+
+classifier_RF = randomForest(x = trainData[1:36],
+                             y = trainData$readmitted,
+                             ntree = 10)
+
 
 
 

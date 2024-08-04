@@ -43,6 +43,7 @@ ggplot(missing_values, aes(x = reorder(variable, -n), y = n)) +
 data$weight = NULL
 data$payer_code = NULL
 data$medical_specialty = NULL
+data$patient_nbr = NULL
 
 # removing variables which will not serve the analysis
 data$encounter_id = NULL # id which will not have any effect on analysis

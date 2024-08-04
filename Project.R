@@ -185,8 +185,6 @@ ggplot(cor_data, aes(Variable1, Variable2, fill = Correlation)) +
 library(dplyr)
 library(forcats)
 
-# Assuming 'data' is your dataframe
-
 # Automatically detect categorical variables
 categorical_vars <- names(data)[sapply(data, is.factor)]
 

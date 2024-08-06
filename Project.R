@@ -6,19 +6,6 @@ str(data) #the data contains mostly integers and categorical variables
 
 ## Data Cleaning
 
-# changing column type from numerical to categorical/nominal
-data$admission_type_id <- as.factor(data$admission_type_id)
-data$discharge_disposition_id <- as.factor(data$discharge_disposition_id)
-data$admission_source_id <- as.factor(data$admission_source_id)
-
-
-# view the rows with duplicate values
-#duplicates <- data[duplicated(data$encounter_id), ]
-#print(duplicates)
-
-# removing duplicate patient numbers
-#data <- data[!duplicated(data$patient_nbr),]
-
 #replacing all "?" with "NA"
 data[data == "?"] <- NA
 head(data)
@@ -178,12 +165,16 @@ ggplot(cor_data, aes(Variable1, Variable2, fill = Correlation)) +
 #Variables num_lab_procedures and time_in_hospital have weak correlation.
 #Variables num_medications and num_lab_procedures have positive correlation.
 
-
-
-
 #Encoding
 library(dplyr)
 library(forcats)
+
+# Assuming 'data' is your dataframe
+
+# changing column type from numerical to categorical/nominal
+#data$admission_type_id <- as.factor(data$admission_type_id)
+#data$discharge_disposition_id <- as.factor(data$discharge_disposition_id)
+#data$admission_source_id <- as.factor(data$admission_source_id)
 
 # Automatically detect categorical variables
 categorical_vars <- names(data)[sapply(data, is.factor)]
@@ -195,30 +186,44 @@ data_encoded <- data %>%
 # Check the encoded data
 str(data_encoded)
 
-#Random Forest
+# Libraries
 library(C50)
 library(caret)
 library(lattice)
 attach(data)
 library(randomForest)
+library(gmodels)
 
+
+#Train/Test Split
 inTrainingData <- createDataPartition(y= readmitted, p=0.70, list = FALSE)
 trainData <- data[inTrainingData,]
 testData <- data[-inTrainingData,]
 
-#Build the model on the training data
 
-#Build the model on the training data
-dtModel <- C5.0(trainData[1:36], trainData$readmitted)
-plot(dtModel)
-
-rf <- randomForest(readmitted~., data=trainData, proximity=TRUE)
+#Random Forest
+trainData$readmitted = factor(trainData$readmitted)
 
 classifier_RF = randomForest(x = trainData[1:36],
                              y = trainData$readmitted,
-                             ntree = 10)
+                             ntree = 500)
+
+#Confusion Matrix
+CrossTable(trainData$readmitted,predict(classifier_RF, trainData))
+CrossTable(trainData$readmitted == predict(classifier_RF, trainData))
+
+CrossTable(testData$readmitted == predict(classifier_RF, testData))
 
 
 
+#C5.0
+dtModel <- C5.0(trainData[1:36], trainData$readmitted)
+
+CrossTable(trainData$readmitted,predict(dtModel, trainData))
+
+CrossTable(trainData$readmitted == predict(dtModel, trainData))
+
+
+#SVM
 
 
